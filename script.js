@@ -1,70 +1,49 @@
-// Подключаем Appwrite
-const client = new Appwrite.Client();
-const account = new Appwrite.Account(client);
-const database = new Appwrite.Databases(client);
+// Импортируем Appwrite SDK
+const { Client, Account } = require('appwrite');
 
-// Настройки Appwrite
+// Настраиваем клиент
+const client = new Client();
 client
   .setEndpoint('https://fra.cloud.appwrite.io/v1') // твой endpoint
-  .setProject('6919bd9c00395c67f284'); // ID проекта
+  .setProject('6919bd9c00395c67f284');             // твой Project ID
 
-const DATABASE_ID = '6919bef7001425273070'; // или ID базы данных
-const USERS_COLLECTION_ID = 'users'; // ID коллекции "users"
+// Объект для работы с аккаунтами
+const account = new Account(client);
 
-// Регистрация пользователя
-async function register() {
-  const fullName = document.getElementById('regName').value;
-  const email = document.getElementById('regEmail').value;
-  const password = document.getElementById('regPassword').value;
-  const role = document.getElementById('regRole').value;
-
+// --------------------
+// Функция регистрации
+// --------------------
+async function registerUser(userId, email, password, name) {
   try {
-    // Создаём аккаунт
-    const user = await account.create(email, password, fullName);
-
-    // Сохраняем дополнительные данные в коллекцию users
-    await database.createDocument(DATABASE_ID, USERS_COLLECTION_ID, user.$id, {
-      fullName,
-      email,
-      role,
-      createdOn: new Date().toISOString(),
-    });
-
-    alert('Пользователь зарегистрирован!');
+    const response = await account.create(userId, email, password, name);
+    console.log('Регистрация успешна:', response);
   } catch (error) {
-    alert('Ошибка: ' + error.message);
+    console.error('Ошибка при регистрации:', error.message);
   }
 }
 
-// Вход пользователя
-async function login() {
-  const email = document.getElementById('loginEmail').value;
-  const password = document.getElementById('loginPassword').value;
-
+// --------------------
+// Функция входа
+// --------------------
+async function loginUser(email, password) {
   try {
-    // Вход
     const session = await account.createSession(email, password);
+    console.log('Вход успешен! Сессия:', session);
 
-    // Получаем данные пользователя из коллекции
-    const docs = await database.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
-      Appwrite.Query.equal('email', email),
-    ]);
-
-    if (docs.documents.length === 0) throw new Error('Пользователь не найден');
-
-    const profile = docs.documents[0];
-    alert(`Вход выполнен! Роль: ${profile.role}`);
+    // Получаем данные пользователя (личный кабинет)
+    const user = await account.get();
+    console.log('Личный кабинет:', user);
   } catch (error) {
-    alert('Ошибка: ' + error.message);
+    console.error('Ошибка при входе:', error.message);
   }
 }
 
-// Выход
-async function logout() {
-  try {
-    await account.deleteSession('current');
-    alert('Вы вышли из аккаунта!');
-  } catch (error) {
-    console.log(error);
-  }
-}
+// --------------------
+// Примеры использования
+// --------------------
+
+// Зарегистрировать нового пользователя (uncomment, если нужно создать)
+// registerUser('user1', 'user@example.com', 'password123', 'Gleb');
+
+// Войти пользователю
+loginUser('user@example.com', 'password123');
