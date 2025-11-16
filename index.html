@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>S.P.A.R.K. Academy</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/appwrite@8.6.0/dist/appwrite.min.js"></script>
 <style>
 body {margin:0; font-family:'Montserrat',sans-serif; background:#000; color:#fff;}
 a {text-decoration:none; color:inherit;}
@@ -27,11 +26,6 @@ p {margin-bottom:30px; font-size:1.1em;}
 /* Круглый крестик */
 .close-btn {position:absolute; top:-20px; left:50%; transform:translateX(-50%); width:35px; height:35px; border-radius:50%; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:#fff; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(10px); transition:0.3s;}
 .close-btn:hover {background: rgba(255,255,255,0.1);}
-
-/* Личный кабинет */
-#dashboard {display:none; padding:20px; max-width:600px; margin:20px auto; color:#fff; background: rgba(255,255,255,0.05); border-radius:20px; backdrop-filter:blur(10px);}
-#dashboard button {padding:10px 20px; border:none; border-radius:12px; cursor:pointer; background: rgba(255,255,255,0.1); color:#fff; font-weight:bold; margin-top:10px;}
-#dashboard button:hover {background: rgba(255,255,255,0.2);}
 
 /* Футер */
 footer {display:flex; justify-content:center; gap:20px; flex-wrap:wrap; padding:20px; margin-top:40px;}
@@ -66,17 +60,13 @@ footer {display:flex; justify-content:center; gap:20px; flex-wrap:wrap; padding:
 <div class="form-popup" id="form-popup">
     <button class="close-btn" onclick="closeForm()">✖</button>
     <h2 id="form-title">Форма</h2>
-    <input type="text" id="name" placeholder="ФИО" required>
-    <input type="tel" id="phone" placeholder="Номер телефона" required>
-    <input type="email" id="email" placeholder="Email" required>
-    <button class="submit-btn" onclick="submitForm()">Отправить</button>
-</div>
-
-<!-- Личный кабинет -->
-<div id="dashboard">
-    <h2>Личный кабинет</h2>
-    <p id="user-info"></p>
-    <button onclick="logout()">Выйти</button>
+    <form id="sparkForm" action="https://formspree.io/f/xgvrpljy" method="POST">
+        <input type="text" name="name" placeholder="ФИО" required>
+        <input type="tel" name="phone" placeholder="Номер телефона" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="hidden" name="_subject" value="Новая заявка с S.P.A.R.K. Academy">
+        <button type="submit" class="submit-btn">Отправить</button>
+    </form>
 </div>
 
 <footer>
@@ -85,21 +75,11 @@ footer {display:flex; justify-content:center; gap:20px; flex-wrap:wrap; padding:
 </footer>
 
 <script>
-// --- Appwrite Client ---
-const client = new Appwrite.Client();
-client
-  .setEndpoint('https://fra.cloud.appwrite.io/v1') // API endpoint
-  .setProject('6919bd9c00395c67f284');           // Project ID
-
-const databases = new Appwrite.Databases(client);
-const databaseId = '6919bef7001425273070'; // Database ID
-const collectionId = 'users';              // Collection ID
-
 // --- Многоязычность ---
 const texts = {
-    ru: { title:"Добро пожаловать в S.P.A.R.K. Academy!", description:"Учите английский легко и интересно. Начните обучение прямо сейчас!", btnStudent:"Записаться на курсы", btnTeacher:"Стать учителем", formStudent:"Записаться на курсы", formTeacher:"Стать учителем", placeholderName:"ФИО", placeholderPhone:"Номер телефона", placeholderEmail:"Email", submitBtn:"Отправить" },
-    en: { title:"Welcome to S.P.A.R.K. Academy!", description:"Learn English easily and interestingly. Start learning now!", btnStudent:"Enroll in Courses", btnTeacher:"Become a Teacher", formStudent:"Enroll in Courses", formTeacher:"Become a Teacher", placeholderName:"Full Name", placeholderPhone:"Phone Number", placeholderEmail:"Email", submitBtn:"Submit" },
-    ua: { title:"Ласкаво просимо до S.P.A.R.K. Academy!", description:"Вивчайте англійську легко та цікаво. Почніть навчання прямо зараз!", btnStudent:"Записатися на курси", btnTeacher:"Стати вчителем", formStudent:"Записатися на курси", formTeacher:"Стати вчителем", placeholderName:"ПІБ", placeholderPhone:"Номер телефону", placeholderEmail:"Email", submitBtn:"Відправити" }
+    ru: { title:"Добро пожаловать в S.P.A.R.K. Academy!", description:"Учите английский легко и интересно. Начните обучение прямо сейчас!", btnStudent:"Записаться на курсы", btnTeacher:"Стать учителем", formStudent:"Записаться на курсы", formTeacher:"Стать учителем" },
+    en: { title:"Welcome to S.P.A.R.K. Academy!", description:"Learn English easily and interestingly. Start learning now!", btnStudent:"Enroll in Courses", btnTeacher:"Become a Teacher", formStudent:"Enroll in Courses", formTeacher:"Become a Teacher" },
+    ua: { title:"Ласкаво просимо до S.P.A.R.K. Academy!", description:"Вивчайте англійську легко та цікаво. Почніть навчання прямо зараз!", btnStudent:"Записатися на курси", btnTeacher:"Стати вчителем", formStudent:"Записатися на курси", formTeacher:"Стати вчителем" }
 };
 
 function changeLanguage(lang){
@@ -113,33 +93,6 @@ function changeLanguage(lang){
         const type = formPopup.dataset.type;
         document.getElementById('form-title').innerText = type==='student'?texts[lang].formStudent:texts[lang].formTeacher;
     }
-    document.getElementById('name').placeholder = texts[lang].placeholderName;
-    document.getElementById('phone').placeholder = texts[lang].placeholderPhone;
-    document.getElementById('email').placeholder = texts[lang].placeholderEmail;
-    document.querySelector('.submit-btn').innerText = texts[lang].submitBtn;
-}
-
-// --- Регистрация ---
-async function submitForm(){
-    const name = document.getElementById('name').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const email = document.getElementById('email').value.trim();
-
-    if(!name || !phone || !email) return alert('Пожалуйста, заполните все поля!');
-
-    try {
-        const response = await databases.createDocument(
-            databaseId,
-            collectionId,
-            Appwrite.ID.unique(),
-            { name, phone, email }
-        );
-        localStorage.setItem('userId', response.$id);
-        closeForm();
-        openDashboard();
-    } catch (err) {
-        alert('Ошибка: ' + err.message);
-    }
 }
 
 function openForm(type){
@@ -150,33 +103,6 @@ function openForm(type){
     document.getElementById('form-title').innerText = type==='student'?texts[lang].formStudent:texts[lang].formTeacher;
 }
 function closeForm(){document.getElementById('form-popup').style.display='none';}
-
-// --- Личный кабинет ---
-async function openDashboard(){
-    const userId = localStorage.getItem('userId');
-    if(!userId) return;
-
-    try {
-        const user = await databases.getDocument(databaseId, collectionId, userId);
-        document.getElementById('dashboard').style.display='block';
-        document.getElementById('form-popup').style.display='none';
-        document.getElementById('user-info').innerHTML = `
-            <strong>Имя:</strong> ${user.name}<br>
-            <strong>Телефон:</strong> ${user.phone}<br>
-            <strong>Email:</strong> ${user.email}
-        `;
-    } catch(err){
-        console.error(err);
-    }
-}
-
-function logout(){
-    localStorage.removeItem('userId');
-    document.getElementById('dashboard').style.display='none';
-}
-
-// --- Автовход ---
-window.addEventListener('load',()=>{if(localStorage.getItem('userId')) openDashboard();});
 </script>
 
 </body>
