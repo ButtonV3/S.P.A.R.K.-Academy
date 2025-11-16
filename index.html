@@ -86,13 +86,14 @@ footer {display:flex; justify-content:center; gap:20px; flex-wrap:wrap; padding:
 
 <script>
 // --- Подключение Appwrite ---
-const client = new Appwrite.Client()
-    .setEndpoint('https://fra.cloud.appwrite.io/v1') // твой API endpoint
-    .setProject('6919bd9c00395c67f284');            // твой Project ID
+const client = new Appwrite.Client();
+client
+  .setEndpoint('https://fra.cloud.appwrite.io/v1') // API endpoint
+  .setProject('6919bd9c00395c67f284');            // Project ID
 
 const databases = new Appwrite.Databases(client);
-const databaseId = 'default'; // ID базы
-const collectionId = 'users'; // ID коллекции
+const databaseId = '6919bef7001425273070'; // Database ID
+const collectionId = 'users';              // Collection ID
 
 // --- Многоязычность ---
 const texts = {
